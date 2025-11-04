@@ -51,13 +51,19 @@ jobs:
         run: ./gradlew assembleDebug
 
 
-      # Step 7 : Upload APK Artifact
-      
+      # Step 7 : Upload versioned APK Artifact
+      - name: Upload versioned APK artifact
+        run: |
+          VERSION_NAME=$(grep "versionName" app/build.gradle.kts | head -1 | awk -F '"' '{print $2}')
+          BUILD_NUMBER=${{ github.run_number }}
+          cp app/build/outputs/apk/debug/app-debug.apk app-debug-v${VERSION_NAME}-build${BUILD_NUMBER}.apk
+        shell: bash
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
-        with: 
-          name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+        with:
+          name: app-debug-v${{ github.run_number }}
+          path: app-debug-v*.apk
 
 
 
