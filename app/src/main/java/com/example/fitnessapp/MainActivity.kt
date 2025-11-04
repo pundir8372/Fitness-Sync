@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Thread.sleep(3000)
+        Thread.sleep(4000)
         installSplashScreen()
         Configuration.getInstance().load(this, getPreferences(MODE_PRIVATE))
         enableEdgeToEdge()

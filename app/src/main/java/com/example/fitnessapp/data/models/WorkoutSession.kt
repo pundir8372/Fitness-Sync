@@ -10,5 +10,6 @@ data class WorkoutSession(
     val routePoints:List<LatLng>,
     val averagePace:Double,
     val timestamp:Long
+    
 
 )
