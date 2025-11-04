@@ -29,4 +29,24 @@ jobs:
           distribution: 'temurin'
           java-version:   17 
 
+      # Step 4 : Cache Gradle Packages
+      - name: Cache Gradle Packages
+        uses: action/cache@v4
+        with:  
+         path: | 
+          ~/.gradle/caches                     
+          ~/.gradle/wrapper
+         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+         restore-keys: |
+            ${{ runner.os }}-gradle-
+
+
+
+        
+
+
+
+
+      
+
 
