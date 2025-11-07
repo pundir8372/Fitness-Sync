@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  #  START JOB - Checks repo and environment
+  #  START JOB  Checks repo and environment
   start:
     runs-on: ubuntu-latest
     steps:
@@ -58,7 +58,7 @@ jobs:
 
   # UNIT TESTS
   unit-test:
-    name: Run Unit Tests
+    name: Run Unit Tests with Coverage
     needs: [lint]
     runs-on: ubuntu-latest
     steps:
@@ -74,14 +74,17 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x gradlew  
 
-      - name: Run unit tests
-        run: ./gradlew testDebugUnitTest
+      #  Run unit tests AND generate JaCoCo coverage
+      - name: Run unit tests with coverage
+        run: ./gradlew testDebugUnitTest jacocoTestReport
 
-      - name: Upload Unit Test Report
+      - name: Upload Unit Test and Coverage Reports
         uses: actions/upload-artifact@v4
         with:
-          name: unit-test-report
-          path: app/build/reports/tests/testDebugUnitTest/
+          name: unit-test-and-coverage-reports
+          path: |
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/reports/jacoco/jacocoTestReport/
 
 
   # STATIC CODE ANALYSIS (SonarQube)
@@ -114,6 +117,7 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x gradlew
 
+      # Run SonarQube analysis (reads the JaCoCo XML report)
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6.0.0
         env:

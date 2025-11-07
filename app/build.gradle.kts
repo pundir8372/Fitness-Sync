@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("jacoco") // Added for code coverage
 }
 
 android {
@@ -26,21 +27,66 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
-    buildFeatures{
-        viewBinding=true
-        dataBinding=true
+
+    buildFeatures {
+        viewBinding = true
+        dataBinding = true
+    }
+
+    //  Configure test options to ensure unit tests run correctly
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
     }
 }
 
-dependencies {
+jacoco {
+    toolVersion = "0.8.10" // Stable JaCoCo version
+}
 
+// Configure JaCoCo test report generation
+tasks.withType<Test> {
+    useJUnitPlatform() // Ensures compatibility with JUnit
+    finalizedBy("jacocoTestReport") // Generate report after tests
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest") // Run tests before generating report
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+
+    // Adjust paths to match Android project structure
+    val debugTree = fileTree("${buildDir}/intermediates/javac/debug") {
+        exclude("**/R.class",
+                "**/R$*.class",
+                "**/BuildConfig.*",
+                "**/Manifest*.*",
+                "**/*Test*.*")
+    }
+
+    val mainSrc = "src/main/java"
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(debugTree)
+    executionData.setFrom(fileTree(buildDir).include(
+        "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
+        "jacoco/testDebugUnitTest.exec"
+    ))
+}
+
+dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -51,6 +97,7 @@ dependencies {
     implementation(libs.coroutines.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
     implementation("org.osmdroid:osmdroid-android:6.1.16")
     implementation("org.osmdroid:osmdroid-wms:6.1.16")
     implementation("androidx.core:core-splashscreen:1.0.0")
